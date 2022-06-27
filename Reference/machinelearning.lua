@@ -1,7 +1,8 @@
 local ltn12 = require("ltn12")
 local http = require("socket.http")
 
-local url = 'http://ml-server-name:5000/' --server would be dummy-app.txt
+local url = 'http://deepshikha/dummy_app:5000/' --server would be dummy-app.txt
+
 function main()
   local method = m.getvar("REQUEST_METHOD")
   local path = m.getvar("REQUEST_FILENAME")
