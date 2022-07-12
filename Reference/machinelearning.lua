@@ -2,7 +2,7 @@ local ltn12 = require("ltn12")
 local http = require("socket.http")
 
 --local url = '' --server would be dummy-app.txt
---script has to send a get request to dummy-app.txt and dummy-app.txt will send a post request with the required data.
+--script has to send a get request to dummy-app.txt.
 function main()
   local method = m.getvar("REQUEST_METHOD")
   local path = m.getvar("REQUEST_FILENAME")
