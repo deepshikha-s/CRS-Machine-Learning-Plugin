@@ -1,92 +1,72 @@
--- Code inspired by http://lua-users.org/wiki/StringRecipes .
-function ends_with(str, ending)
-	str = str:lower()
-	ending = ending:lower()
-	return ending == "" or str:sub(-#ending) == ending
-end
+-- This is like a driver code to point to different ML servers and models
+-- and seek ml_inbound_anomaly_score using such models
+-- this ml driver is invoked by machine-learning-plugin-before.conf
 
-function check_ip(ip)
-	if type(ip) ~= "string" then
-		return false
-	end
-	-- IPv4
-	local chunks = {ip:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")}
-	if #chunks == 4 then
-		for _, chunk in pairs(chunks) do
-			if tonumber(chunk) > 255 then
-				return false
-			end
-		end
-		return true
-	end
-	-- IPv6
-	local chunks = {ip:match("^"..(("([a-fA-F0-9]*):"):rep(8):gsub(":$", "$")))}
-	if #chunks == 8 or (#chunks < 8 and ip:match("::") and not ip:gsub("::", "", 1):match("::")) then
-		for _, chunk in pairs(chunks) do
-			if #chunk > 0 and tonumber(chunk, 16) > 65535 then
-				return false
-			end
-		end
-		return true
-	end
-	return false
-end
+-- currently most of this code is from https://github.com/coreruleset/coreruleset/pull/2067/files
 
-function main(matched_bot)
-	pcall(require, "m")
-	local ok, socket = pcall(require, "socket")
-	if not ok then
-		m.log(2, "Fake Bot Plugin ERROR: LuaSocket library not installed, please install it or disable this plugin.")
-		return nil
-	end
-	if matched_bot == "googlebot" then
-		-- https://developers.google.com/search/docs/advanced/crawling/verifying-googlebot
-		bot_domains = {".googlebot.com", ".google.com"}
-		bot_name = "Googlebot"
-	elseif matched_bot == "facebookexternalhit" or matched_bot == "facebookcatalog" or matched_bot == "facebookbot" then
-		-- https://developers.facebook.com/docs/sharing/webmasters/crawler/
-		-- https://developers.facebook.com/docs/sharing/bot/
-		bot_domains = {".facebook.com", ".fbsv.net"}
-		bot_name = "Facebookbot"
-	elseif matched_bot == "bingbot" then
-		-- https://blogs.bing.com/webmaster/2012/08/31/how-to-verify-that-bingbot-is-bingbot
-		bot_domains = {".search.msn.com"}
-		bot_name = "Bingbot"
-	elseif matched_bot == "twitterbot" then
-		-- https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/troubleshooting-cards#validate_twitterbot
-		bot_domains = {".twitter.com", ".twttr.com"}
-		bot_name = "Twitterbot"
-	elseif matched_bot == "applebot" then
-		-- https://support.apple.com/en-us/HT204683
-		bot_domains = {".applebot.apple.com"}
-		bot_name = "Applebot"
-	else
-		return nil
-	end
-	local remote_addr = m.getvar("REMOTE_ADDR", "none")
-	local remote_host = m.getvar("REMOTE_HOST", "none")
-	-- If Apache HostnameLookups is On, we can do one less DNS lookup.
-	if not check_ip(remote_host) then
-		hosts = { [1] = remote_host }
-	else
-		hosts = socket.dns.getnameinfo(remote_addr)
-	end
-	for k1, host in pairs(hosts) do
-		for k2, domain in pairs(bot_domains) do
-			if ends_with(host, domain) then
-				addrinfo = socket.dns.getaddrinfo(host)
-				if addrinfo ~= nil then
-					for k3, ips in pairs(addrinfo) do
-						for k4, ip in pairs(ips) do
-							if remote_addr == ip then
-								return nil
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-	m.setvar("tx.fake-bot-plugin_bot_name", bot_name)
-	return string.format("Fake Bot Plugin: Detected fake %s.", bot_name)
+-- set your machine learning server URL
+local ml_server_url = 'http://localhost/ml-model-server/placeholder.py'
+
+-- local variable for inbound_ml_status update. By default it must be zero 
+local inbound_ml_status = 0
+
+local ltn12 = require("ltn12")
+local http = require("socket.http")
+
+function main()
+
+  local method = m.getvar("REQUEST_METHOD")
+  local path = m.getvar("REQUEST_FILENAME")
+  local hour = m.getvar("TIME_HOUR")
+  local day = m.getvar("TIME_DAY")
+  local args = m.getvars("ARGS")
+  local args_str = "{}"
+  -- transform the args array into a string following JSON format
+  if args ~= nil then
+    args_str = "{"
+    for k,v in pairs(args) do
+      name = v["name"]
+      value = v["value"]
+      value = value:gsub('"', "$#$")
+      args_str = args_str..'"'..name..'":"'..value..'",'
+    end
+    if #args == 0 then
+      args_str = "{}"
+    else
+      args_str = string.sub(args_str, 1, -2)
+      args_str = args_str.."}"
+    end
+  end
+
+ -- construct http request for the ml server
+  local body = "method="..method.."&path="..path.."&args="..args_str.."&hour="..hour.."&day="..day
+  local headers = {
+    ["Content-Type"] = "application/x-www-form-urlencoded";
+    ["Content-Length"] = #body
+  }
+  local source = ltn12.source.string(body)
+
+  local client, code, headers, status = http.request{
+    url=url, 
+    method='POST',
+    source=source,
+    headers=headers
+  }
+
+  if client == nil then
+    m.log(4, 'The server is unreachable \n')
+  end
+
+  if code == 401 then
+    m.log(4,'Anomaly found by ML')
+  end
+
+  if code == 200 then
+    inbound_ml_status = 1
+  end
+
+  m.log(4, status, '\n')
+
+  return inbound_ml_status
+
 end
