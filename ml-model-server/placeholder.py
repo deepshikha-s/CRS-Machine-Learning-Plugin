@@ -5,7 +5,8 @@ import sklearn
 import psutil
 import os
 import random
-from helper_predict import *
+import json
+from helper import *
 
 pid = os.getpid()
 py = psutil.Process(pid)
@@ -54,18 +55,21 @@ def query_ml():
 
 def predict(method, path, args, hour, day):
     # Example of function to predict score using ML
-    features = get_features(method, path, args, hour, day)
-    print(features)
+    #features = get_features(method, path, args, hour, day)
+    #print(features)
 
     ##DEE scores = ml_model.decision_function(features)
     ##DEE for now, stubing score compute
     score = random.randint(0,5)
 
-    print(scores[0])
+    #print(scores[0])
     ##DEE labels = 1 - 2 * (scores < threshold).astype('int')
 
     ##DEE return labels[0]
+    print(score)
     return score
 
 if __name__ == '__main__':
+    print("Entering main")
     app.run()
+

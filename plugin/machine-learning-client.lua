@@ -4,16 +4,21 @@
 
 -- currently most of this code is from https://github.com/coreruleset/coreruleset/pull/2067/files
 
+--m.log(1, "File accessed. Outside main.")
+
 -- set your machine learning server URL
-local ml_server_url = 'http://localhost/ml-model-server/placeholder.py'
+local ml_server_url = 'http://127.0.0.1:5000/'
 
 -- local variable for inbound_ml_status update. By default it must be zero 
-local inbound_ml_status = 0
-
+local inbound_ml_result = 0
+--tx.inbound_ml_result = inbound_ml_result
+--m.log(1, "Nil issue doesn't exist" ..tx.inbound_ml_result)
 local ltn12 = require("ltn12")
 local http = require("socket.http")
 
 function main()
+  --print("Trying. Main func reached")
+  m.log(1,"Lua file accessed successfully inside main")
 
   local method = m.getvar("REQUEST_METHOD")
   local path = m.getvar("REQUEST_FILENAME")
@@ -21,6 +26,7 @@ function main()
   local day = m.getvar("TIME_DAY")
   local args = m.getvars("ARGS")
   local args_str = "{}"
+  m.log(1, "Request is" ..method .. path ..hour ..day, args)
   -- transform the args array into a string following JSON format
   if args ~= nil then
     args_str = "{"
@@ -46,27 +52,33 @@ function main()
   }
   local source = ltn12.source.string(body)
 
+  m.log(1, 'url:',ml_server_url, 'header:',headers, 'body:',body)
+
   local client, code, headers, status = http.request{
-    url=url, 
+    url=ml_server_url, 
     method='POST',
     source=source,
     headers=headers
   }
 
   if client == nil then
-    m.log(4, 'The server is unreachable \n')
+    m.log(1, 'The server is unreachable \n')
   end
 
   if code == 401 then
-    m.log(4,'Anomaly found by ML')
+    m.log(1,'Anomaly found by ML')
   end
 
   if code == 200 then
-    inbound_ml_status = 1
+    m.log(1, "Server has been accessed.")
+    inbound_ml_result = 1
   end
 
-  m.log(4, status, '\n')
-
-  return inbound_ml_status
+  --  m.log(4, status, '\n')
+  m.log(1, "Lua executed")
+  m.log(1, "VAR " ..tx.inbound_ml_result)
+  --m.setvar
+  return inbound_ml_result
+  --return 1
 
 end
