@@ -60,7 +60,6 @@ function main()
   end
 
   if code == 200 then
-    m.log(1, "Server has been accessed.")
     inbound_ml_result = 1
   end
 
