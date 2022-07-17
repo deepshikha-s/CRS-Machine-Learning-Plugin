@@ -43,14 +43,14 @@ def query_ml():
         score = predict(method, path, args, hour, day)
 
         # Return the score to the Lua script
-        if score > 0:
-            return "Normal", 200, score
-        return "Anormal", 401, score
+        if score > 3:
+            return "Normal", 200
+        return "Anormal", 401
 
     elif request.method == 'GET':
         # Simply return 200 on GET / for health checking
-        return "Service is up", 200,0
-    return "Bad Request", 400, 3
+        return "Service is up", 200
+    return "Bad Request", 400
 
 
 def predict(method, path, args, hour, day):
@@ -60,7 +60,7 @@ def predict(method, path, args, hour, day):
 
     ##DEE scores = ml_model.decision_function(features)
     ##DEE for now, stubing score compute
-    score = random.randint(0,5)
+    score = random.randint(0,6)
 
     #print(scores[0])
     ##DEE labels = 1 - 2 * (scores < threshold).astype('int')
@@ -72,4 +72,3 @@ def predict(method, path, args, hour, day):
 if __name__ == '__main__':
     print("Entering main")
     app.run()
-

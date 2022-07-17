@@ -1,32 +1,25 @@
 -- This is like a driver code to point to different ML servers and models
--- and seek ml_inbound_anomaly_score using such models
--- this ml driver is invoked by machine-learning-plugin-before.conf
+-- and seek ml_inbound_status using such models
+-- this ml driver is invoked by machine-learning-plugin-after.conf if
+-- the anomaly score exceeds the threshold
 
 -- currently most of this code is from https://github.com/coreruleset/coreruleset/pull/2067/files
 
---m.log(1, "File accessed. Outside main.")
-
 -- set your machine learning server URL
 local ml_server_url = 'http://127.0.0.1:5000/'
-
 -- local variable for inbound_ml_status update. By default it must be zero 
 local inbound_ml_result = 0
---tx.inbound_ml_result = inbound_ml_result
---m.log(1, "Nil issue doesn't exist" ..tx.inbound_ml_result)
 local ltn12 = require("ltn12")
 local http = require("socket.http")
 
 function main()
-  --print("Trying. Main func reached")
-  m.log(1,"Lua file accessed successfully inside main")
-
   local method = m.getvar("REQUEST_METHOD")
   local path = m.getvar("REQUEST_FILENAME")
   local hour = m.getvar("TIME_HOUR")
   local day = m.getvar("TIME_DAY")
   local args = m.getvars("ARGS")
   local args_str = "{}"
-  m.log(1, "Request is" ..method .. path ..hour ..day, args)
+
   -- transform the args array into a string following JSON format
   if args ~= nil then
     args_str = "{"
@@ -51,9 +44,6 @@ function main()
     ["Content-Length"] = #body
   }
   local source = ltn12.source.string(body)
-
-  m.log(1, 'url:',ml_server_url, 'header:',headers, 'body:',body)
-
   local client, code, headers, status = http.request{
     url=ml_server_url, 
     method='POST',
@@ -74,11 +64,7 @@ function main()
     inbound_ml_result = 1
   end
 
-  --  m.log(4, status, '\n')
-  m.log(1, "Lua executed")
-  m.log(1, "VAR " ..tx.inbound_ml_result)
-  --m.setvar
+  m.setvar("TX.inbound_ml_status", inbound_ml_result)
   return inbound_ml_result
-  --return 1
 
 end
