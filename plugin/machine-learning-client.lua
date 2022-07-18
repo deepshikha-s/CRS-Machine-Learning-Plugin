@@ -11,6 +11,7 @@ local ml_server_url = 'http://127.0.0.1:5000/'
 local inbound_ml_result = 0
 local ltn12 = require("ltn12")
 local http = require("socket.http")
+local respbody = {}
 
 function main()
   local method = m.getvar("REQUEST_METHOD")
@@ -48,21 +49,23 @@ function main()
     url=ml_server_url, 
     method='POST',
     source=source,
-    headers=headers
+    headers=headers,
+    sink = ltn12.sink.table(respbody)
   }
-
+  respbody = table.concat(respbody)
   if client == nil then
     m.log(1, 'The server is unreachable \n')
   end
 
   if code == 401 then
+    inbound_ml_result = 0
     m.log(1,'Anomaly found by ML')
   end
 
   if code == 200 then
     inbound_ml_result = 1
   end
-
+  m.setvar("TX.inbound_ml_anomaly_score", respbody)
   m.setvar("TX.inbound_ml_status", inbound_ml_result)
   return inbound_ml_result
 

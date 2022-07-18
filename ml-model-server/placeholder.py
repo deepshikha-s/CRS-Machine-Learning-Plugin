@@ -43,9 +43,9 @@ def query_ml():
         score = predict(method, path, args, hour, day)
 
         # Return the score to the Lua script
-        if score > 3:
-            return "Normal", 200
-        return "Anormal", 401
+        if score < 5:
+            return str(score), 200
+        return str(score), 401
 
     elif request.method == 'GET':
         # Simply return 200 on GET / for health checking
