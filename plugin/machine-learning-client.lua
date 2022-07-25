@@ -1,3 +1,5 @@
+--import urllib.request
+--import urllib.parse
 -- This is like a driver code to point to different ML servers and models
 -- and seek ml_inbound_status using such models
 -- this ml driver is invoked by machine-learning-plugin-after.conf if
@@ -20,6 +22,9 @@ function main()
   local day = m.getvar("TIME_DAY")
   local args = m.getvars("ARGS")
   local args_str = "{}"
+  local reqbody = m.getvar("CONTENT-TYPE")
+  
+  m.log(1, "Args ", reqbody)
 
   -- transform the args array into a string following JSON format
   if args ~= nil then

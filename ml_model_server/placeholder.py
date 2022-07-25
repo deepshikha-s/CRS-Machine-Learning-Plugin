@@ -1,3 +1,4 @@
+#importing all necessary modules and libraries
 from flask import Flask
 from flask import request
 import pickle
@@ -13,18 +14,18 @@ py = psutil.Process(pid)
 memoryUse = py.memory_info().rss
 print('RAM INIT: ', memoryUse)
 
-##DEE Previously implemented model is proprietery and not available from previous author
-##DEE stubbing the model for now and using a random generator for score calc
-##DEE in due course, a ML model will be developed and plugged in here
+# Previously implemented model is proprietery and not available from previous author
+# stubbing the model for now and using a random generator for score calc
+# in due course, a ML model will be developed and plugged in here
 
-##DEE pkl_filename = 'saved_models/iforest.pkl'
-##DEE threshold = -0.313
+# pkl_filename = 'saved_models/iforest.pkl'
+threshold = -0.313
 
 app = Flask(__name__)
 
 # Load the ML model in memory
-##DEE with open(pkl_filename, 'rb') as file:
-##DEE    ml_model = pickle.load(file)
+# with open(pkl_filename, 'rb') as file:
+#     ml_model = pickle.load(file)
 
 @app.route('/', methods=['POST', 'GET'])
 
@@ -43,7 +44,7 @@ def query_ml():
         score = predict(method, path, args, hour, day)
 
         # Return the score to the Lua script
-        if score < 5:
+        if score > 0:
             return str(score), 200
         return str(score), 401
 
@@ -58,17 +59,16 @@ def predict(method, path, args, hour, day):
     #features = get_features(method, path, args, hour, day)
     #print(features)
 
-    ##DEE scores = ml_model.decision_function(features)
-    ##DEE for now, stubing score compute
-    score = random.randint(0,6)
+    # scores = ml_model.decision_function(features)
+    # for now, stubing score compute
+    score = random.randint(-5,5)
 
     #print(scores[0])
-    ##DEE labels = 1 - 2 * (scores < threshold).astype('int')
+    labels = 1 - 2 * (score < threshold).astype('int')
 
-    ##DEE return labels[0]
+    # return labels[0]
     print(score)
-    return score
+    return labels
 
 if __name__ == '__main__':
-    print("Entering main")
     app.run()
