@@ -59,9 +59,8 @@ def predict(method, path, args, hour, day):
     #features = get_features(method, path, args, hour, day)
     #print(features)
 
-    # scores = ml_model.decision_function(features)
+    score = ml_model.decision_function()
     # for now, stubing score compute
-    score = random.randint(-5,5)
 
     #print(scores[0])
     labels = 1 - 2 * (score < threshold).astype('int')
