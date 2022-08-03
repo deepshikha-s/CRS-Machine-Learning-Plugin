@@ -22,28 +22,45 @@ function main()
   local day = m.getvar("TIME_DAY")
   local args = m.getvars("ARGS")
   local args_str = "{}"
-  local reqbody = m.getvar("CONTENT-TYPE")
-  
-  m.log(1, "Args ", reqbody)
+  --local reqbody = m.getvar("REQUEST_CONTENT_TYPE")
+  --local reqbodyl = m.getvar("REQUEST_BODY_LENGTH")
+  local data = {}
+  data["unique_id"] = m.getvar("UNIQUE_ID")
+  data["protocol"] = m.getvar("REQUEST_PROTOCOL")
+  data["uri"] = m.getvar("REQUEST_URI")
+
+  if m.getvar("REQUEST_BODY") then 
+    data["body"] = m.getvar("REQUEST_BODY")
+  else
+    data["body"] = ""
+  end  
+
+  --m.log(1, "body " ..reqbody)
+  --m.log(1, "length "..reqbodyl)
+  --m.log(1, data)
+  m.log(1, "id "..data["unique_id"])
+  m.log(1, "protocol "..data["protocol"])
+  m.log(1, "uri "..data["uri"])
 
   -- transform the args array into a string following JSON format
-  if args ~= nil then
-    args_str = "{"
-    for k,v in pairs(args) do
-      name = v["name"]
-      value = v["value"]
-      value = value:gsub('"', "$#$")
-      args_str = args_str..'"'..name..'":"'..value..'",'
+  --function json()
+    if args ~= nil then
+      args_str = "{"
+      for k,v in pairs(args) do
+        name = v["name"]
+        value = v["value"]
+        value = value:gsub('"', "$#$")
+        args_str = args_str..'"'..name..'":"'..value..'",'
+      end
+      if #args == 0 then
+        args_str = "{}"
+      else
+        args_str = string.sub(args_str, 1, -2)
+        args_str = args_str.."}"
+      end
     end
-    if #args == 0 then
-      args_str = "{}"
-    else
-      args_str = string.sub(args_str, 1, -2)
-      args_str = args_str.."}"
-    end
-  end
-
- -- construct http request for the ml server
+  --end
+  -- construct http request for the ml server
   local body = "method="..method.."&path="..path.."&args="..args_str.."&hour="..hour.."&day="..day
   local headers = {
     ["Content-Type"] = "application/x-www-form-urlencoded";
