@@ -20,6 +20,8 @@ In mode 1, the requests which have an inbound anomaly score greater than the inb
 
 In mode 2, all requests are scanned by the machine learning model and the decision to pass or block the request is made solely by the model. If the machine learning anomaly score crosses the machine learning threshold, the request is blocked.
 
+This plugin has been developed without an actual machine learning model in place. Hence, the score has been stubbed to generate a random score. A user can choose to run the plugin with any machine learning model of his/her choice. To do so, directives have been provided to add the machine learning model file.
+
 ## Testing
 
 To be updated
