@@ -16,6 +16,7 @@ print('RAM INIT: ', memoryUse)
 UPLOAD_FOLDER = '/var/www/html/uploads'
 '''
 DIRECTIVE!!!
+Save your machine learningmodel to the saved_models folder.
 Add the path where you have saved your machine learning model and uncomment the next line
 '''
 # pkl_filename = 'saved_models/iforest.pkl'
@@ -34,7 +35,37 @@ Uncomment the following 2 lines to load the file to the server.
 #     ml_model = pickle.load(file)
 
 @app.route('/', methods=['POST', 'GET'])
+def process_content():
+    content_type = request.headers.get('Content-Type')
+    print("Entered process_content")
+    print(content_type)
+    method = request.form['method']
+    path = request.form['path']
+    args = json.loads(request.form['args'])
+    for k, v in args.items():
+        args[k] = v.replace("$#$", '"')
+    hour = int(request.form['hour'])
+    day = int(request.form['day'])
+    print(method)
+    print(path)
+    print(args)
+    print(hour, day)
+    if (content_type == 'application/json'):
+        json = request.json
+        print(content_type)
+        return json
+    if (content_type == 'application/x-www-form-urlencoded'):
+        s = query_ml()
+        return s
+    if (str(content_type)[0:19] == 'multipart/form-data'):
+        s = upload()
+        return s
+    else:
+        #print("Content-Type not supported!")
+        print(content_type)
+        return 'Content-Type not supported!'
 
+@app.route('/', methods=['POST', 'GET'])
 def query_ml():
     if request.method == 'POST':
         # Retrieve arguments from the request
