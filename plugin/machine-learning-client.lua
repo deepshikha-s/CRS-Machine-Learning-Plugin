@@ -35,6 +35,8 @@ function main()
   local content_length = " "
   local headers = {}
   local body = " "
+  local processor = m.getvar("REQBODY_PROCESSOR")
+  m.log(1, "processor "..processor)
   m.log(1, "Content Type "..content_type)
   req_data["req_protocol"] = m.getvar("REQUEST_PROTOCOL")
   req_data["req_uri"] = m.getvar("REQUEST_URI")
@@ -186,11 +188,14 @@ if filesizes ~= nil then
       ["Content-Length"] = #body
     }
   else
-    body = "method="..method.."&path="..path.."&args="..args_str.."&files"..filesstr.."&hour="..hour.."&day="..day
+    body = "method="..method.."&path="..path.."&args="..args_str.."&files="..filesstr.."&hour="..hour.."&day="..day
+    --body = "method="..method.."&path="..path.."&args="..args_str.."&hour="..hour.."&day="..day
     headers = {
-      ["Content-Type"] = content_type;
-      ["Content-Length"] = content_length
+      --["Content-Type"] = content_type;
+      ["Content-Type"] = "application/x-www-form-urlencoded";
+      ["Content-Length"] = #body
     }
+    m.log(1, "REQ body "..body)
   end
   local source = ltn12.source.string(body)
   local client, code, headers, status = http.request{

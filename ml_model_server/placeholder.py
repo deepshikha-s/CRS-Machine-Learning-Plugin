@@ -14,42 +14,30 @@ py = psutil.Process(pid)
 memoryUse = py.memory_info().rss
 print('RAM INIT: ', memoryUse)
 UPLOAD_FOLDER = '/var/www/html/uploads'
-'''
-DIRECTIVE!!!
-Save your machine learningmodel to the saved_models folder.
-Add the path where you have saved your machine learning model and uncomment the next line
-'''
+# Previously implemented model is proprietery and not available from previous author
+# stubbing the model for now and using a random generator for score calc
+# in due course, a ML model will be developed and plugged in here
+
 # pkl_filename = 'saved_models/iforest.pkl'
 threshold = -0.313
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_PATH'] = 10485760
-
-# Load the ML model in memory
-'''
-DIRECTIVE!!!
-Uncomment the following 2 lines to load the file to the server.
-'''
-# with open(pkl_filename, 'rb') as file:
-#     ml_model = pickle.load(file)
-
 @app.route('/', methods=['POST', 'GET'])
 def process_content():
     content_type = request.headers.get('Content-Type')
     print("Entered process_content")
     print(content_type)
-    method = request.form['method']
-    path = request.form['path']
-    args = json.loads(request.form['args'])
-    for k, v in args.items():
-        args[k] = v.replace("$#$", '"')
-    hour = int(request.form['hour'])
-    day = int(request.form['day'])
-    print(method)
-    print(path)
-    print(args)
-    print(hour, day)
+    print(request.form)
+    #files = request.form['files']
+    #method = request.form['method']
+    #path = request.form['path']
+    #hour = int(request.form['hour'])
+    #day = int(request.form['day'])
+    #print(method)
+    #print(path)
+    #print(hour, day)
     if (content_type == 'application/json'):
         json = request.json
         print(content_type)
@@ -64,7 +52,9 @@ def process_content():
         #print("Content-Type not supported!")
         print(content_type)
         return 'Content-Type not supported!'
-
+# Load the ML model in memory
+# with open(pkl_filename, 'rb') as file:
+#     ml_model = pickle.load(file)
 @app.route('/', methods=['POST', 'GET'])
 def query_ml():
     if request.method == 'POST':
@@ -72,15 +62,18 @@ def query_ml():
         method = request.form['method']
         path = request.form['path']
         args = json.loads(request.form['args'])
+        files = request.form['files']
         for k, v in args.items():
             args[k] = v.replace("$#$", '"')
         hour = int(request.form['hour'])
         day = int(request.form['day'])
-        print(method)
         print(path)
         print(args)
         print(hour, day)
-        process_json()
+        print(files)
+        #if files != {}:
+            #s = upload()
+            #return s
         # Predict a score (1 for normal, -1 for attack)
         score = predict(method, path, args, hour, day)
 
@@ -96,36 +89,24 @@ def query_ml():
 
 @app.route("/uploader", methods=["POST"])
 def upload():
+    print("Entered upload")
     if request.method == 'POST':
       f = request.files['file']
       print('app_root:', app.root_path, 'file to upload: ', f.filename)
       f.save(os.path.join(app.root_path, 'uploads', secure_filename(f.filename)))
       return 'file uploaded successfully'
 
-def process_json():
-    content_type = request.headers.get('Content-Type')
-    if (content_type == 'application/json'):
-        json = request.json
-        print(content_type)
-        return json
-    else:
-        print(content_type)
-        return 'Content-Type not supported!'
-
-
 def predict(method, path, args, hour, day):
     # Example of function to predict score using ML
-    '''
-    DIRECTIVE!!!
-    Uncomment the following lines to complete the machine learning plugin.
-    Comment the line which generates a random score to stub the score in the absence of a machine learing model.
-    '''
     #features = get_features(method, path, args, hour, day)
     #print(features)
+
     # scores = ml_model.decision_function(features)
-    # for now, stubing score for completeness.
+    # for now, stubing score compute
     score = random.randint(-5,5)
+
     #print(scores[0])
+    #labels = 1 - 2 * (score < threshold).astype('int')
     labels = 1 - 2 * int(score < threshold)
     # return labels[0]
     print(score)

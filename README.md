@@ -10,6 +10,13 @@ For full and up to date instructions for the different available plugin
 installation methods, refer to [How to Install a Plugin](https://coreruleset.org/docs/concepts/plugins/#how-to-install-a-plugin)
 in the official CRS documentation.
 
+##Instalation and Setup Steps:
+1. Clone the repository and copy all the files in the plugin folder of the repository into the plugins folder of your local Core Rule Set installation.
+2. Copy the ml_model_server folder into /var/www/html
+3. Add your machine learning model in ml_model_server/saved_models and follow the directives in placeholder.py to include the model in the server.
+4. Start the flask server.
+5. The plugin is now ready to use.
+
 ## Working
 
 This plugin works in two modes - 
