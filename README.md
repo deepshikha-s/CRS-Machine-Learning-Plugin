@@ -12,19 +12,19 @@ in the official CRS documentation.
 
 ## Installation and Setup Steps:
 
-Pre-Requisites:
+### Pre-Requisites:
 You will need to install the following-
-[] luasocket
-[] ltn
->flask
->request 
->pickle 
->sklearn
->psutil
->os
->random
->helper
->werkzeug
+- luasocket
+- ltn
+- flask
+- request 
+- pickle 
+- sklearn
+- psutil
+- os
+- random
+- helper
+- werkzeug
 
 1. Clone the repository and copy all the files in the plugin folder of the repository into the plugins folder of your local Core Rule Set installation.
 2. Copy the ml_model_server folder into /var/www/html
