@@ -14,8 +14,8 @@ in the official CRS documentation.
 
 Pre-Requisites:
 You will need to install the following-
->luasocket
->ltn
+[] luasocket
+[] ltn
 >flask
 >request 
 >pickle 
