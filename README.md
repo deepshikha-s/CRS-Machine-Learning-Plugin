@@ -13,9 +13,15 @@ in the official CRS documentation.
 ## Installation and Setup Steps:
 
 ### Pre-Requisites:
-You will need to install the following-
+You will need to install the following libraries-
+
+1.  Lua: 
+
 - luasocket
 - ltn
+
+2. Python: 
+
 - flask
 - request 
 - pickle 
