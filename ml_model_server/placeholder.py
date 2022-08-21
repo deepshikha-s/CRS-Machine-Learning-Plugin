@@ -14,10 +14,10 @@ py = psutil.Process(pid)
 memoryUse = py.memory_info().rss
 print('RAM INIT: ', memoryUse)
 UPLOAD_FOLDER = '/var/www/html/uploads'
-# Previously implemented model is proprietery and not available from previous author
-# stubbing the model for now and using a random generator for score calc
-# in due course, a ML model will be developed and plugged in here
-
+'''
+DIRECTIVE!!!
+Add the path where you have saved your machine learning model and uncomment the next line
+'''
 # pkl_filename = 'saved_models/iforest.pkl'
 threshold = -0.313
 
@@ -53,6 +53,10 @@ def process_content():
         print(content_type)
         return 'Content-Type not supported!'
 # Load the ML model in memory
+'''
+DIRECTIVE!!!
+Uncomment the following 2 lines to load the file to the server.
+'''
 # with open(pkl_filename, 'rb') as file:
 #     ml_model = pickle.load(file)
 @app.route('/', methods=['POST', 'GET'])
@@ -97,6 +101,11 @@ def upload():
       return 'file uploaded successfully'
 
 def predict(method, path, args, hour, day):
+    '''
+    DIRECTIVE!!!
+    Uncomment the following lines to complete the machine learning plugin.
+    Comment the line which generates a random score to stub the score in the absence of a machine learing model.
+    '''
     # Example of function to predict score using ML
     #features = get_features(method, path, args, hour, day)
     #print(features)
