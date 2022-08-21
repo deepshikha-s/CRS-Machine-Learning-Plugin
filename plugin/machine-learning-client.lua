@@ -182,24 +182,13 @@ function main()
     end
   end
   m.log(1, "File Sizes "..filesizestr)
-  m.log(1, "Content "..content_type.." "..content_length)
 
   -- Construct http request for the ml server
-  if content_type == " " then
-    body = "method="..method.."&path="..path.."&args="..args_str.."&hour="..hour.."&day="..day
-    headers = {
-      ["Content-Type"] = "application/x-www-form-urlencoded";
-      ["Content-Length"] = #body
-    }
-  else
-    body = "method="..method.."&path="..path.."&args="..args_str.."&files="..filesstr.."&hour="..hour.."&day="..day
-    headers = {
-      ["Content-Type"] = "application/x-www-form-urlencoded";
-      ["Content-Length"] = #body
-    }
-    m.log(1, "REQ body "..body)
-  end
-
+  body = "method="..method.."&path="..path.."&args="..args_str.."&files="..filesstr.."&sizes="..filesizestr.."&hour="..hour.."&day="..day
+  headers = {
+    ["Content-Type"] = "application/x-www-form-urlencoded";
+    ["Content-Length"] = #body
+  }
   local source = ltn12.source.string(body)
   local client, code, headers, status = http.request{
     url=ml_server_url, 
