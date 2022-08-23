@@ -36,8 +36,7 @@ You will need to install the following libraries-
 
 ### lua-socket library installation
 LuaSocket library should be part of your linux distribution. Here is an example of installation on Debian linux:
-```apt install lua-socket
-```
+```apt install lua-socket```
 
 #### CRS Container
 The official CRS container does not yet have the lua-socket library installed. Currently, this has to be installed manually.
