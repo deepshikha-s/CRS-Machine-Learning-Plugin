@@ -2,15 +2,27 @@
 
 ## Description
 
-This is a plugin that brings machine learning support to the CRS.
+This is a plugin that serves to integrate machine learning support to the CRS.
+
+The plugin consists of 3 parts -
+1. Plugin rules
+2. Lua script
+3. Flask server
+
+### Plugin Rules
+The plugin contains rules which call the Lua script and pass or block the request based on the status returned to the rule.
+
+### Lua Script
+The lua script receives the request from the rule, reads the data sent in the request and reconstructs the request to form a http POST request to be sent to the flask server ```ml_model_server```. After receiving the response from the server, the lua script sends the status response back to the CRS plugin. 
+
+### Flask Server
+This server receives a http POST request from the lua script. It extracts the different parameters from the request. 
 
 The plugin is able to scan these parts of the request:
-
 body
 uploaded file(s) (to be extended)
 
 Communication with machine learning server is performed using a bundled Lua script and has following characteristics:
-
 no external programs or tools are executed (no forking etc.)
 no need for extended permissions
 
