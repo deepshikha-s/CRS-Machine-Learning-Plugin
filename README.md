@@ -10,13 +10,17 @@ For full and up to date instructions for the different available plugin
 installation methods, refer to [How to Install a Plugin](https://coreruleset.org/docs/concepts/plugins/#how-to-install-a-plugin)
 in the official CRS documentation.
 
-## Setup:
-
-### Pre-Requisites:
+## Pre-Requisites:
 You will need to install the following libraries-
 
-1.  Lua: 
-- lua-socket
+### lua-socket library installation
+LuaSocket library should be part of your linux distribution. Here is an example of installation on Debian linux:
+```apt install lua-socket```
+
+#### CRS Container
+The official CRS container does not yet have the lua-socket library installed. Currently, this has to be installed manually.
+When you get the error, the lua-socker library is missing.
+
 
 2. Python: 
 - flask
@@ -27,7 +31,6 @@ You will need to install the following libraries-
 - os
 - random
 - helper
-- werkzeug
 
 1. Clone the repository and copy all the files in the plugin folder of the repository into the plugins folder of your local Core Rule Set installation.
 2. Copy the ml_model_server folder into /var/www/html
