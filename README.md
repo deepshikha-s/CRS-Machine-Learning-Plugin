@@ -16,15 +16,7 @@ The plugin contains rules which call the Lua script and pass or block the reques
 The lua script receives the request from the rule, reads the data sent in the request and reconstructs the request to form a http POST request to be sent to the flask server ```ml_model_server```. After receiving the response from the server, the lua script sends the status response back to the CRS plugin. 
 
 ### Flask Server
-This server receives a http POST request from the lua script. It extracts the different parameters from the request. 
-
-The plugin is able to scan these parts of the request:
-body
-uploaded file(s) (to be extended)
-
-Communication with machine learning server is performed using a bundled Lua script and has following characteristics:
-no external programs or tools are executed (no forking etc.)
-no need for extended permissions
+This server receives a http POST request from the lua script. It extracts the different parameters from the request. The parameters extracted are request method, path, arguements, file names, file sizes, hour and day. These parameters are sent to a function which is supposed to call a machine learning model. This function has been stubbed by  random function for now. 
 
 Currently, the machine learning model has been stubbed with a random score generator function due to the absence of a machine learning model. Directives have been provided to add your own machine learning model to the plugin.
 
@@ -65,12 +57,11 @@ When you get the error, the lua-socker library is missing.
 - random
 - helper
 
-## Configration 
-1. Clone the repository and copy all the files in the plugin folder of the repository into the plugins folder of your local Core Rule Set installation.
-2. Copy the ml_model_server folder into /var/www/html
-3. Add your machine learning model in ml_model_server/saved_models and follow the directives in placeholder.py to include the model in the server.
+## Configration of the flask server 
+2. Copy the ```ml_model_server``` folder into ```/var/www/html```.
+3. Add your machine learning model in ```ml_model_server/saved_models``` and follow the directives in ```placeholder.py``` to include the model in the server.
 4. Start the flask server. To run the flask server, 
-   1. Create a file runflash.sh in the home directory.
+   1. Create a file ```runflash.sh``` in the home directory.
    2. Add the following lines in the file:
       ```
        export FLASK_APP=/var/www/html/ml-model-server/placeholder.py
@@ -86,19 +77,43 @@ This plugin works in two modes -
 1. False positive detection mode
 2. General detection mode.
 
+You can change the mode by going to machine-learning-config.conf and modifying the value of ```machine-learning-plugin_mode```. If the value of this variable is 1 the plugin works in false positive detection mode and if the value of the variable is 2, the plugin works in general detection mode.
+
 ### False Positive Detection Mode
 In mode 1, the requests which have an inbound anomaly score greater than the inbound anomaly threshold are scanned by the machine learning model. Only if the machine learning model give anomaly score greater than the machine learning anomaly threshold the request is blocked. Else, the request is passed and labeled as a false positive.
 
 ### General Detection Mode
 In mode 2, all requests are scanned by the machine learning model and the decision to pass or block the request is made solely by the model. If the machine learning anomaly score crosses the machine learning threshold, the request is blocked.
 
-You can change the mode by going to machine-learning-config.conf and modifying the value of ```machine-learning-plugin_mode```. If the value of this variable is 1 the plugin works in false positive detection mode and if the value of the variable is 2, the plugin works in general detection mode.
-
 This plugin has been developed without an actual machine learning model in place. Hence, the score has been stubbed to generate a random score. A user can choose to run the plugin with any machine learning model of his/her choice. To do so, directives have been provided in ```placeholder.py``` to add the machine learning model file.
 
 ## Testing
+After configuration, the plugin should be tested in both modes. 
 
-To be updated
+### False positive detection mode 
+This mode can be tested with a request which returns an anomaly score higher than the configured anomaly score. 
+
+### General detection mode 
+This mode can be tested with any request. 
+
+
+For example, both modes can be tested using 
+```
+curl -v localhost/?arg=../../etc/passwd
+``` 
+Using the default CRS configurations, the request would either end in a 403 Forbidden status or would go through. This is because the plugin has been stubbed by a function which returns a random score.
+If the request goes through, the logs would contain the following lines 
+```
+[Wed Aug 24 14:52:18.340389 2022] [:error] [pid 224780:tid 140554122372672] [client 127.0.0.1:56862] [client 127.0.0.1] ModSecurity: Warning. 1 [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "77"] [id "9516210"] [msg "ML kicked in for evaluation."] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
+[Wed Aug 24 14:52:18.340649 2022] [:error] [pid 224780:tid 140554122372672] [client 127.0.0.1:56862] [client 127.0.0.1] ModSecurity: Warning. Operator EQ matched 1 at TX:inbound_ml_status. [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "90"] [id "95161310"] [msg "ML Model passed"] [data "ML model status: 1. ML model anomaly score: 1. CRS anomaly score: 40"] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
+```
+
+If the request returns a 403 status, the logs would contain the following lines
+```
+ModSecurity: Anomaly found by ML [hostname "localhost"] [uri "/"] [unique_id "YwXs5TaXH2S_WKCQ3YNWKAAAAEE"]
+ModSecurity: Warning. 0 [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "77"] [id "9516210"] [msg "ML kicked in for evaluation."] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXs5TaXH2S_WKCQ3YNWKAAAAEE"]
+ModSecurity: Access denied with code 403 (phase 2). Operator EQ matched 0 at TX:inbound_ml_status. [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "102"] [id "9516320"] [msg "ML Model detected anomalies and blocked"] [data "ML model status: 0. ML model anomaly score: 0. CRS anomaly score: 40"] [severity "CRITICAL"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXs5TaXH2S_WKCQ3YNWKAAAAEE"]
+``` 
 
 ## License
 
