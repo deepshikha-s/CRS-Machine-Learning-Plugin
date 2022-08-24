@@ -48,8 +48,10 @@ LuaSocket library should be part of your linux distribution. Here is an example 
 
 #### CRS Container
 The official CRS container does not yet have the lua-socket library installed. Currently, this has to be installed manually.
-When you get the error, the lua-socker library is missing.
-
+When you get the following error, the lua-socket library is missing.
+```
+ModSecurity: Lua: Script execution failed: attempt to call a nil value [hostname "localhost"] [uri "/"] [unique_id "Yv4H9oxd8Kvjozs0DGkhWAAAAIA"]
+```
 
 ### ml_model_server/placeholder.py
 - flask
@@ -108,8 +110,8 @@ curl -v localhost/?arg=../../etc/passwd
 Using the default CRS configurations, the request would either end in a 403 Forbidden status or would go through. This is because the plugin has been stubbed by a function which returns a random score.
 If the request goes through, the logs would contain the following lines 
 ```
-[Wed Aug 24 14:52:18.340389 2022] [:error] [pid 224780:tid 140554122372672] [client 127.0.0.1:56862] [client 127.0.0.1] ModSecurity: Warning. 1 [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "77"] [id "9516210"] [msg "ML kicked in for evaluation."] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
-[Wed Aug 24 14:52:18.340649 2022] [:error] [pid 224780:tid 140554122372672] [client 127.0.0.1:56862] [client 127.0.0.1] ModSecurity: Warning. Operator EQ matched 1 at TX:inbound_ml_status. [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "90"] [id "95161310"] [msg "ML Model passed"] [data "ML model status: 1. ML model anomaly score: 1. CRS anomaly score: 40"] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
+ModSecurity: Warning. 1 [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "77"] [id "9516210"] [msg "ML kicked in for evaluation."] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
+ModSecurity: Warning. Operator EQ matched 1 at TX:inbound_ml_status. [file "/etc/modsecurity/plugins/machine-learning-after.conf"] [line "90"] [id "95161310"] [msg "ML Model passed"] [data "ML model status: 1. ML model anomaly score: 1. CRS anomaly score: 40"] [severity "NOTICE"] [ver "machine-learning-plugin/1.0.0"] [tag "anomaly-evaluation"] [hostname "localhost"] [uri "/"] [unique_id "YwXtyjaXH2S_WKCQ3YNWKQAAAEI"]
 ```
 
 If the request returns a 403 status, the logs would contain the following lines
