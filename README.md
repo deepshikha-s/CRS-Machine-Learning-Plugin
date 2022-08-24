@@ -13,12 +13,14 @@ The plugin consists of 3 parts -
 The plugin contains rules which call the Lua script and pass or block the request based on the status returned to the rule.
 
 ### Lua Script
-The lua script receives the request from the rule, reads the data sent in the request and reconstructs the request to form a http POST request to be sent to the flask server ```ml_model_server```. After receiving the response from the server, the lua script sends the status response back to the CRS plugin. 
+The lua script receives the request from the rule, reads the data sent in the request and reconstructs the request to form a http POST request to be sent to the flask server ```ml_model_server```. 
+After receiving the response from the server, the lua script sends the status response back to the CRS plugin. 
 
 ### Flask Server
-This server receives a http POST request from the lua script. It extracts the different parameters from the request. The parameters extracted are request method, path, arguements, file names, file sizes, hour and day. These parameters are sent to a function which is supposed to call a machine learning model. This function has been stubbed by  random function for now. 
+This server receives a http POST request from the lua script. It extracts the different parameters from the request. The parameters extracted are request method, path, arguements, file names, file sizes, hour and day. These parameters are sent to a function which is supposed to call a machine learning model. This function has been stubbed by a random function for now. 
+This function is supposed to return a ml_anomaly_score. Based on this score, the server reutrns a 200 OK or 401 status. 
 
-Currently, the machine learning model has been stubbed with a random score generator function due to the absence of a machine learning model. Directives have been provided to add your own machine learning model to the plugin.
+This workflow has been depicted in the diagram below. 
 
 ```
 ┌───────────────────────────┐                         ┌────────────────────────────┐                  ┌────────────────────────┐
@@ -29,6 +31,8 @@ Currently, the machine learning model has been stubbed with a random score gener
 │                           │◄────────────────────────┤                            │◄─────────────────┤                        │
 └───────────────────────────┘                         └────────────────────────────┘                  └────────────────────────┘
 ```
+Currently, the machine learning model has been stubbed with a random score generator function due to the absence of a machine learning model. Directives have been provided to add your own machine learning model to the plugin.
+
 ## Installation
 
 For full and up to date instructions for the different available plugin
